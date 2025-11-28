@@ -1,4 +1,4 @@
-import { parseTime, formatTime } from './paceCalculator';
+import { parseTime, formatTime } from './paceCalculator.js';
 
 export const generateFuelingPlan = (formData) => {
     // This function seems unused in the current flow, but updating for consistency
@@ -7,8 +7,8 @@ export const generateFuelingPlan = (formData) => {
     const hours = totalSeconds / 3600;
 
     let carbsPerHour = 30;
-    if (hours > 2.5) carbsPerHour = 90;
-    else if (hours > 1.5) carbsPerHour = 60;
+    if (hours > 2.5) carbsPerHour = 50; // Reduced from 90 for conservative approach
+    else if (hours > 1.5) carbsPerHour = 40; // Reduced from 60
 
     return { carbsPerHour, totalSeconds };
 };
@@ -20,15 +20,16 @@ export const getFuelingReminders = (splits) => {
     const totalSeconds = splits[splits.length - 1].mile * splits[splits.length - 1].paceSeconds; // Approx
     const hours = totalSeconds / 3600;
 
-    // Scientific Guidelines (ISSN / ACSM)
+    // Conservative Guidelines (Better for recreational runners / sensitive stomachs)
     // < 75 mins: Mouth rinse or small amounts
-    // 1-2.5 hrs: 30-60g/hr
-    // > 2.5 hrs: 60-90g/hr
+    // 1-2.5 hrs: 30-40g/hr
+    // > 2.5 hrs: 40-50g/hr
 
     let carbsPerHour = 0;
-    if (hours < 1.25) carbsPerHour = 30; // Optional but helpful
-    else if (hours < 2.5) carbsPerHour = 60;
-    else carbsPerHour = 90;
+    if (hours < 1.25) carbsPerHour = 0; // Short runs don't strictly need carbs
+    else if (hours < 2.5) carbsPerHour = 30; // ~1 gel every 50 mins
+    else if (hours < 4.0) carbsPerHour = 40; // ~1 gel every 37 mins (Conservative)
+    else carbsPerHour = 50; // ~1 gel every 30 mins (Max conservative)
 
     const gramsPerGel = 25; // Standard gel
     const gelsPerHour = carbsPerHour / gramsPerGel;
@@ -41,18 +42,18 @@ export const getFuelingReminders = (splits) => {
     let currentElapsedTime = 0;
 
     const coachMessages = [
-        "Start fueling now. We top up early so you don't crash later.",
-        "Time for another gel. This keeps your blood sugar steady and your brain sharp.",
-        "Stick to the plan. Your muscles are burning fuel fast—replace it.",
-        "Don't skip this. This specific gel is what prevents 'the wall' at mile 20.",
-        "Keep it going. Your glycogen stores are depleting—stay ahead of it.",
-        "Halfway fueled. Consistency is key to avoiding the bonk.",
-        "You're doing great. This gel maintains your pace and mental clarity.",
-        "Push through. Your body needs this to sustain power output.",
-        "Almost there. This keeps your legs fresh for the final miles.",
-        "Late-race fuel. This is crucial for maintaining form.",
-        "Second-to-last gel. Your finish line fuel is coming up.",
-        "Final top-up. Power through to the finish line!"
+        "Fuel early. Digestion slows as you fatigue.",
+        "Bank energy now. The race starts at mile 20.",
+        "Stay ahead of the depletion curve.",
+        "Your brain needs this sugar to stay sharp.",
+        "Don't think, just fuel. Stick to the plan.",
+        "Consistency beats intensity. Keep fueling.",
+        "Protect your glycogen stores.",
+        "This gel buys you a strong finish.",
+        "Fueling is training. Execute.",
+        "Late race power comes from this gel.",
+        "Focus. Form. Fuel.",
+        "Empty the tank, but fill it first."
     ];
 
     for (const split of splits) {

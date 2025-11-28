@@ -10,12 +10,14 @@ import runnerImage3 from '../assets/runner-2.png';
 const images = [runnerImage1, runnerImage2, runnerImage3];
 
 const LandingPage = ({ onCalculate }) => {
+    console.log("LandingPage loaded - KM Support Version");
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [formData, setFormData] = useState({
         finishTime: '',
         pacingStyle: 'even',
         distance: 'marathon',
         terrain: 'flat',
+        unit: 'miles',
     });
 
     useEffect(() => {
@@ -62,7 +64,7 @@ const LandingPage = ({ onCalculate }) => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                    <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-2">
                         Running Pace <span className="text-primary">Calculator</span>
                     </h1>
                     <p className="text-gray-600 mb-8 max-w-md">
@@ -131,6 +133,23 @@ const LandingPage = ({ onCalculate }) => {
                                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                             </div>
                         </InputCard>
+
+                        <InputCard label="Unit">
+                            <div className="flex p-1 bg-gray-100 rounded-lg">
+                                <button
+                                    onClick={() => setFormData(prev => ({ ...prev, unit: 'miles' }))}
+                                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${formData.unit === 'miles' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Miles
+                                </button>
+                                <button
+                                    onClick={() => setFormData(prev => ({ ...prev, unit: 'km' }))}
+                                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${formData.unit === 'km' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Kilometers
+                                </button>
+                            </div>
+                        </InputCard>
                     </div>
 
                     <button
@@ -139,7 +158,7 @@ const LandingPage = ({ onCalculate }) => {
                     >
                         Generate my race splits
                     </button>
-                    <p className="text-xs text-gray-400 mt-3 max-w-sm">
+                    <p className="text-xs text-gray-400 mt-3">
                         Based on data from thousands of runners + peer-reviewed pacing strategies.
                     </p>
                 </motion.div>

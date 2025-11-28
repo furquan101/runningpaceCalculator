@@ -31,53 +31,60 @@ export const formatPace = (secondsPerMile) => {
 };
 
 export const calculateSplits = (formData) => {
-    const { finishTime, distance, pacingStyle, terrain } = formData;
+    const { finishTime, distance, pacingStyle, terrain, unit = 'miles' } = formData;
     const totalSeconds = parseTime(finishTime);
     const totalDistanceMeters = DISTANCES[distance];
-    const totalMiles = totalDistanceMeters / 1609.34;
 
-    const averagePaceSeconds = totalSeconds / totalMiles;
+    // Calculate total units (miles or km)
+    const isKm = unit === 'km';
+    const totalUnits = isKm ? totalDistanceMeters / 1000 : totalDistanceMeters / 1609.34;
+
+    const averagePaceSeconds = totalSeconds / totalUnits;
 
     let splits = [];
-    for (let i = 1; i <= Math.ceil(totalMiles); i++) {
-        let milePace = averagePaceSeconds;
+    for (let i = 1; i <= Math.ceil(totalUnits); i++) {
+        let splitPace = averagePaceSeconds;
 
         // Pacing Style Adjustments
         if (pacingStyle === 'negative') {
             // Start slower, end faster
             // Simple linear progression
-            const factor = (i - totalMiles / 2) / totalMiles; // -0.5 to 0.5
-            milePace -= factor * 20; // +/- 10 seconds swing
+            const factor = (i - totalUnits / 2) / totalUnits; // -0.5 to 0.5
+            splitPace -= factor * 20; // +/- 10 seconds swing
         } else if (pacingStyle === 'positive') {
             // Start faster, end slower
-            const factor = (i - totalMiles / 2) / totalMiles;
-            milePace += factor * 20;
+            const factor = (i - totalUnits / 2) / totalUnits;
+            splitPace += factor * 20;
         } else if (pacingStyle === 'conservative') {
             // Start very slow, build up gradually
-            if (i <= 3) milePace += 15; // First 3 miles slow
-            else if (i > totalMiles - 6) milePace -= 10; // Last 6 miles fast
+            if (i <= 3) splitPace += 15; // First 3 units slow
+            else if (i > totalUnits - 6) splitPace -= 10; // Last 6 units fast
         } else if (pacingStyle === 'aggressive') {
             // Bank time early
-            if (i <= 10) milePace -= 10; // First 10 miles fast
-            else if (i > 20) milePace += 15; // Fade late
+            if (i <= 10) splitPace -= 10; // First 10 units fast
+            else if (i > 20) splitPace += 15; // Fade late
         }
 
         // Terrain Adjustments (Mock logic)
         if (terrain === 'hilly') {
-            // Simulate hills at specific miles (e.g., 7, 14, 20)
-            if (i === 7 || i === 14 || i === 20) milePace += 30; // Uphill
-            if (i === 8 || i === 15 || i === 21) milePace -= 10; // Downhill
+            // Simulate hills at specific markers
+            // Adjust markers for KM vs Miles roughly
+            const hillMarkers = isKm ? [11, 22, 32] : [7, 14, 20];
+            const downhillMarkers = isKm ? [13, 24, 34] : [8, 15, 21];
+
+            if (hillMarkers.includes(i)) splitPace += 30; // Uphill
+            if (downhillMarkers.includes(i)) splitPace -= 10; // Downhill
         } else if (terrain === 'trail') {
             // Trail is generally slower and more variable
-            if (i % 2 === 0) milePace += 20; // Technical section
-            else milePace += 10; // Drag
+            if (i % 2 === 0) splitPace += 20; // Technical section
+            else splitPace += 10; // Drag
         }
 
         splits.push({
-            mile: i,
-            paceSeconds: milePace,
-            formattedPace: formatPace(milePace),
-            elapsedTime: formatTime(milePace * i) // Approximate
+            mile: i, // This is actually "unit" (mile or km)
+            paceSeconds: splitPace,
+            formattedPace: formatPace(splitPace),
+            elapsedTime: formatTime(splitPace * i) // Approximate
         });
     }
 

@@ -4,9 +4,12 @@ import { ArrowLeft, Zap, Trophy, Timer, TrendingUp, Loader2, RefreshCw } from 'l
 import { getRaceStrategy } from '../services/aiCoach';
 
 const ResultsPage = ({ results, onReset }) => {
-    const { averagePace, splits, fueling, finishTime, pacingStyle, distance, terrain, carbsPerHour } = results;
+    const { averagePace, splits, fueling, finishTime, pacingStyle, distance, terrain, carbsPerHour, unit = 'miles' } = results;
     const [strategy, setStrategy] = useState(null);
     const [loadingStrategy, setLoadingStrategy] = useState(true);
+
+    const unitLabel = unit === 'km' ? 'km' : 'mi';
+    const distanceLabel = unit === 'km' ? 'Kilometer' : 'Mile';
 
     useEffect(() => {
         const fetchStrategy = async () => {
@@ -44,10 +47,29 @@ const ResultsPage = ({ results, onReset }) => {
                             </div>
                         ) : (
                             <div className="space-y-4">
+                                {strategy?.isOffline && (
+                                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                                        <div className="flex">
+                                            <div className="flex-shrink-0">
+                                                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-3">
+                                                <p className="text-sm text-yellow-700">
+                                                    AI Coach is in <strong>Offline Mode</strong>.
+                                                </p>
+                                                <p className="text-xs text-yellow-600 mt-1">
+                                                    Add your API key to <code>.env</code> to enable personalized AI strategies.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 <p className="text-gray-700 leading-relaxed">
                                     {strategy?.strategyText}
                                     <br /><br />
-                                    <span className="font-medium text-primary">💡 Coach Tip:</span> Break the race into 3 chunks. The first 10 miles are for your head, the next 10 for your training, and the last 6.2 are for your heart.
+                                    <span className="font-medium text-primary">💡 Coach Tip:</span> Break the race into 3 chunks. The first part is for your head, the middle for your training, and the end for your heart.
                                 </p>
                                 {strategy?.checkpoints && Array.isArray(strategy.checkpoints) && (
                                     <div className="flex flex-wrap gap-2 mt-4">
@@ -69,14 +91,14 @@ const ResultsPage = ({ results, onReset }) => {
                     {/* Splits Table */}
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                         <div className="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
-                            <h3 className="font-semibold text-gray-900">Mile Splits</h3>
-                            <span className="text-sm text-gray-500">Avg Pace: {averagePace}/mi</span>
+                            <h3 className="font-semibold text-gray-900">{distanceLabel} Splits</h3>
+                            <span className="text-sm text-gray-500">Avg Pace: {averagePace}/{unitLabel}</span>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left">
                                 <thead className="text-xs text-gray-500 uppercase bg-gray-50/50">
                                     <tr>
-                                        <th className="px-6 py-3">Mile</th>
+                                        <th className="px-6 py-3">{distanceLabel}</th>
                                         <th className="px-6 py-3">Pace</th>
                                         <th className="px-6 py-3">Elapsed</th>
                                         <th className="px-6 py-3">Notes</th>
@@ -116,7 +138,7 @@ const ResultsPage = ({ results, onReset }) => {
                             <span className="text-sm text-gray-500">Average Pace</span>
                         </div>
                         <p className="text-2xl font-bold text-gray-900">{averagePace}</p>
-                        <p className="text-xs text-gray-400">min/mile</p>
+                        <p className="text-xs text-gray-400">min/{unitLabel}</p>
                     </div>
 
                     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
@@ -145,7 +167,7 @@ const ResultsPage = ({ results, onReset }) => {
                             {fueling.map((f, i) => (
                                 <div key={i} className="relative">
                                     <span className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-yellow-400 border-2 border-white ring-1 ring-gray-100" />
-                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Mile {f.mile}</p>
+                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">{distanceLabel} {f.mile}</p>
                                     <p className="text-sm font-medium text-gray-900 bg-yellow-50/50 p-2 rounded-lg border border-yellow-100 inline-block">
                                         {f.message}
                                     </p>
